@@ -1,63 +1,99 @@
-import { z } from 'zod';
-import { insertApplicationSchema, applications } from './schema';
+import type { Express } from "express";
+import type { Server } from "http";
+import { storage } from "./storage";
+import { api } from "@shared/routes";
+import { z } from "zod";
 
-export const errorSchemas = {
-  validation: z.object({
-    message: z.string(),
-    field: z.string().optional(),
-    errors: z.array(z.object({ // Added for more detailed error reporting
-      path: z.array(z.string()),
-      message: z.string()
-    })).optional(),
-  }),
-  internal: z.object({
-    message: z.string(),
-  }),
-  notFound: z.object({
-    message: z.string(),
-  }),
-};
+export async function registerRoutes(
+  httpServer: Server,
+  app: Express
+): Promise<Server> {
 
-export const api = {
-  applications: {
-    create: {
-      method: 'POST' as const,
-      path: '/api/applications' as const,
-      input: insertApplicationSchema, // This now uses the rebranded favoriteSlog schema
-      responses: {
-        201: z.custom<typeof applications.$inferSelect>(),
-        400: errorSchemas.validation,
-        500: errorSchemas.internal,
-      },
-    },
-    status: {
-      method: 'GET' as const,
-      path: '/api/status/:address' as const, // Added :address parameter for clarity
-      responses: {
-        200: z.object({
-          status: z.string()
-        }),
-        404: errorSchemas.notFound,
-        500: errorSchemas.internal,
-      }
-    }
-  }
-};
+  /**
+   * POST: Create a new application
+   */
+  app.post(api.applications.create.path, async (req, res) => {
+    try {
+      const input = api.applications.create.input.parse(req.body);
+      const application = await storage.createApplication(input);
 
-export function buildUrl(path: string, params?: Record<string, string | number>): string {
-  let url = path;
-  if (params) {
-    Object.entries(params).forEach(([key, value]) => {
-      if (url.includes(`:${key}`)) {
-        url = url.replace(`:${key}`, String(value));
+      if (process.env.RESEND_API_KEY) {
+        try {
+          const resendRes = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              from: 'Outworlders <onboarding@resend.dev>',
+              to: 'delivered@resend.dev',
+              subject: 'New Outworlder Signal Received',
+              html: `
+                <div style="font-family: monospace; background: #050505; color: #c8ff00; padding: 24px;">
+                  <h2 style="letter-spacing: 0.1em;">◈ NEW SIGNAL REGISTERED</h2>
+                  <p><strong>X Handle / Link:</strong> ${application.xUsername}</p>
+                  <p><strong>EVM Address:</strong> ${application.evmAddress}</p>
+                  <p><strong>Quote Tweet:</strong> ${application.quoteTweet}</p>
+                  <hr style="border-color: rgba(200,255,0,0.2); margin: 16px 0;" />
+                  <p style="font-size: 11px; color: #666;">OUTWORLD3RS · Reality stops negotiating.</p>
+                </div>
+              `
+            })
+          });
+
+          if (!resendRes.ok) {
+            console.error('Resend API error:', await resendRes.text());
+          }
+        } catch (e) {
+          console.error('Email service failed:', e);
+        }
       } else {
-        url += `${url.includes('?') ? '&' : '?'}${key}=${value}`;
+        console.log("RESEND_API_KEY not set. Storing application in DB only.");
       }
-    });
-  }
-  return url;
+
+      res.status(201).json(application);
+
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: err.errors.map(e => ({ field: e.path.join('.'), message: e.message }))
+        });
+      }
+
+      console.error("Route Error:", err);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  /**
+   * GET: Check application status by EVM address
+   */
+  app.get(api.applications.status.path, async (req, res) => {
+    try {
+      const { address } = req.params;
+
+      if (!address) {
+        return res.status(400).json({ message: "Wallet address is required" });
+      }
+
+      const application = await storage.getApplicationByAddress(address);
+
+      if (!application) {
+        return res.status(404).json({ message: "No application found for this address" });
+      }
+
+      res.status(200).json({
+        status: "submitted",
+        timestamp: application.createdAt
+      });
+
+    } catch (err) {
+      console.error("Status Route Error:", err);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  return httpServer;
 }
-
-export type CreateApplicationInput = z.infer<typeof api.applications.create.input>;
-export type ApplicationResponse = z.infer<typeof api.applications.create.responses[201]>;
-
