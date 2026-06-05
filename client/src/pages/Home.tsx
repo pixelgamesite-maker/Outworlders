@@ -423,16 +423,7 @@ export default function Home() {
   const [modal, setModal] = useState<ModalState>('idle');
   const [hovered, setHovered] = useState(false);
 
-  // Ambient glitch title effect
-  const [titleGlitch, setTitleGlitch] = useState(false);
-  useEffect(() => {
-    const loop = setInterval(() => {
-      setTitleGlitch(true);
-      setTimeout(() => setTitleGlitch(false), 600);
-    }, 6000);
-    return () => clearInterval(loop);
-  }, []);
-  const titleText = useGlitchText('OUTWORLDERS', titleGlitch);
+  const titleGlitch = false;
 
   return (
     <div className="crt-wrap" style={{ minHeight: '100vh', background: '#050505', color: '#c8ff00', fontFamily: "'Courier Prime', monospace", position: 'relative', overflow: 'hidden' }}>
@@ -488,13 +479,10 @@ export default function Home() {
             fontFamily: "'Courier Prime', monospace", fontWeight: 700,
             fontSize: 'clamp(2.5rem, 12vw, 7rem)',
             color: '#c8ff00', letterSpacing: '0.18em',
-            textShadow: titleGlitch
-              ? '3px 0 #ff0044, -3px 0 #00ffff, 0 0 30px rgba(200,255,0,0.8)'
-              : '0 0 40px rgba(200,255,0,0.3)',
-            transition: 'text-shadow 0.05s',
+            textShadow: '0 0 40px rgba(200,255,0,0.3)',
             position: 'relative', lineHeight: 1,
           }}>
-            {titleText}
+            OUTWORLDERS
           </h1>
         </motion.div>
 
