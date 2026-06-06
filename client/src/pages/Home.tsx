@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Config ────────────────────────────────────────────────────────
 const FOLLOW_URL = 'https://x.com/outworld3rs?s=21';
-const TWEET_URL  = 'https://x.com/outworld3rs/status/2063202888868917757?s=20’;
-const EYES_URL   = '/Eyes.png'; // place Eyes.png in /public
+const TWEET_URL  = 'https://x.com/outworld3rs/status/2063202888868917757';
+const EYES_URL   = '/Eyes.png';
 
 const QUOTES = [
   "An Outworlder is not someone who left the world, but someone the world could no longer fully contain.",
@@ -21,7 +21,6 @@ const QUOTES = [
 
 const GLITCH_CHARS = '!<>-_\\/[]{}—=+*^?#∆◊◈▓░▒█▀▄';
 
-// ── Persistence key ───────────────────────────────────────────────
 const STORAGE_KEY = 'outworld3rs_wl_state';
 
 function loadState() {
@@ -36,7 +35,6 @@ function saveState(data: object) {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch { /* noop */ }
 }
 
-// ── Glitch Text Hook ──────────────────────────────────────────────
 function useGlitchText(target: string, isActive: boolean) {
   const [display, setDisplay] = useState('');
   const frameRef = useRef<number>(0);
@@ -71,7 +69,6 @@ function useGlitchText(target: string, isActive: boolean) {
   return display;
 }
 
-// ── Quote Cycler ──────────────────────────────────────────────────
 function QuoteCycler() {
   const [idx, setIdx]       = useState(0);
   const [active, setActive] = useState(true);
@@ -97,7 +94,6 @@ function QuoteCycler() {
   );
 }
 
-// ── Scanline overlay ──────────────────────────────────────────────
 const ScanLines = () => (
   <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 1, backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px)', mixBlendMode: 'overlay' }} />
 );
@@ -126,7 +122,6 @@ const CRTFlicker = () => (
   </>
 );
 
-// ── Ticker ────────────────────────────────────────────────────────
 function Ticker() {
   const items = ['OUTWORLD3RS', '∆', 'THE SEAMS ARE SHOWING', '◊', 'PERCEPTION BREAKS', '∆', 'YOU WERE NEVER CONTAINED', '◊', 'REALITY STOPS NEGOTIATING', '∆'];
   return (
@@ -138,16 +133,14 @@ function Ticker() {
   );
 }
 
-// ── Task types ────────────────────────────────────────────────────
 type TaskKey = 'follow' | 'likeQuote' | 'tagFriends';
 
 const TASKS: { key: TaskKey; label: string; url: string; needsInput?: boolean; placeholder?: string }[] = [
-  { key: 'follow',    label: 'Follow @outworld3rs',              url: FOLLOW_URL },
-  { key: 'likeQuote', label: 'Like & Quote the post',            url: TWEET_URL, needsInput: true, placeholder: 'https://x.com/outworld3rs/status/2063202888868917757?s=20' },
-  { key: 'tagFriends',label: 'Tag 2 friends in the comments',    url: TWEET_URL, needsInput: true, placeholder: 'https://x.com/outworld3rs/status/2063202888868917757?s=20' },
+  { key: 'follow',     label: 'Follow @outworld3rs',           url: FOLLOW_URL },
+  { key: 'likeQuote',  label: 'Like & Quote the post',         url: TWEET_URL, needsInput: true, placeholder: 'Paste your quote tweet URL' },
+  { key: 'tagFriends', label: 'Tag 2 friends in the comments', url: TWEET_URL, needsInput: true, placeholder: 'Paste your comment URL' },
 ];
 
-// ── Success Modal ─────────────────────────────────────────────────
 function SuccessModal({ onClose }: { onClose: () => void }) {
   const [glitch, setGlitch] = useState(false);
   useEffect(() => { const t = setTimeout(() => setGlitch(true), 200); return () => clearTimeout(t); }, []);
@@ -176,9 +169,7 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-// ── Whitelist Modal ───────────────────────────────────────────────
 function WhitelistModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
-  // Load persisted state
   const persisted = loadState();
 
   const [wallet, setWallet]   = useState<string>(persisted?.wallet || '');
@@ -189,7 +180,6 @@ function WhitelistModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
   const [submitting, setSubmitting] = useState(false);
   const isSubmitted = persisted?.submitted === true;
 
-  // Persist on every change
   useEffect(() => {
     saveState({ wallet, xHandle, done: Array.from(done), inputs, submitted: isSubmitted });
   }, [wallet, xHandle, done, inputs, isSubmitted]);
@@ -253,7 +243,6 @@ function WhitelistModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
         onClick={e => e.stopPropagation()}
         style={{ background: '#060606', border: '1px solid rgba(200,255,0,0.3)', boxShadow: '0 0 60px rgba(200,255,0,0.12), inset 0 0 40px rgba(200,255,0,0.03)', width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto', padding: '2rem 1.75rem' }}>
 
-        {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem' }}>
           <div>
             <p style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: '0.58rem', letterSpacing: '0.28em', color: 'rgba(200,255,0,0.4)', marginBottom: 8, textTransform: 'uppercase' }}>∆ Transmission Protocol</p>
@@ -264,14 +253,12 @@ function WhitelistModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
             onMouseLeave={e => (e.currentTarget.style.color = 'rgba(200,255,0,0.4)')}>✕</button>
         </div>
 
-        {/* Already submitted banner */}
         {isSubmitted && (
           <div style={{ border: '1px solid rgba(200,255,0,0.4)', background: 'rgba(200,255,0,0.06)', padding: '0.85rem 1rem', marginBottom: '1.5rem', fontFamily: "'Share Tech Mono', monospace", fontSize: '0.7rem', color: '#c8ff00', letterSpacing: '0.1em', textAlign: 'center' }}>
             ◈ SIGNAL ALREADY REGISTERED
           </div>
         )}
 
-        {/* Tasks */}
         <label style={lbl}>Complete tasks</label>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: '1.75rem' }}>
           {TASKS.map(task => {
@@ -299,7 +286,6 @@ function WhitelistModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
           })}
         </div>
 
-        {/* Fields */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <label style={lbl}>EVM Wallet Address</label>
@@ -329,23 +315,17 @@ function WhitelistModal({ onClose, onSuccess }: { onClose: () => void; onSuccess
   );
 }
 
-// ── Main Page ─────────────────────────────────────────────────────
 type ModalState = 'idle' | 'form' | 'success';
 
 export default function Home() {
   const [modal, setModal] = useState<ModalState>('idle');
   const [hovered, setHovered] = useState(false);
 
-  const handleSuccess = () => {
-    setModal('success');
-  };
-
   return (
     <div className="crt-wrap" style={{ minHeight: '100vh', background: '#050505', color: '#c8ff00', fontFamily: "'Share Tech Mono', monospace", position: 'relative', overflow: 'hidden' }}>
       <CRTFlicker />
       <ScanLines />
 
-      {/* Vertical ambient lines */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
         {[15, 35, 65, 85].map((left, i) => (
           <div key={i} className="vline" style={{ position: 'absolute', left: `${left}%`, top: 0, width: 1, background: 'rgba(200,255,0,0.04)', animationDelay: `${i * 2.1}s` }} />
@@ -354,56 +334,36 @@ export default function Home() {
 
       <Ticker />
 
-      {/* Main content */}
       <div style={{ position: 'relative', zIndex: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 32px)', padding: '3rem 1.5rem' }}>
 
-        {/* Eyes image */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1 }} style={{ marginBottom: '1.5rem' }}>
-          <img
-            src={EYES_URL}
-            alt=""
-            className="eyes-img"
+          <img src={EYES_URL} alt="" className="eyes-img"
             style={{ width: 'clamp(80px, 20vw, 140px)', display: 'block', filter: 'drop-shadow(0 0 12px rgba(200,255,0,0.5)) brightness(0) saturate(100%) invert(85%) sepia(60%) saturate(400%) hue-rotate(30deg)' }}
-            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-          />
+            onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         </motion.div>
 
-        {/* Title */}
         <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }} style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
           <div style={{ fontSize: '0.58rem', letterSpacing: '0.38em', color: 'rgba(200,255,0,0.35)', marginBottom: '1.25rem', fontFamily: "'Share Tech Mono', monospace" }}>
             ∆ &nbsp; SIGNAL TRANSMISSION &nbsp; ◊
           </div>
-          <h1 style={{
-            fontFamily: "'Share Tech Mono', monospace",
-            fontSize: 'clamp(2.8rem, 10vw, 6.5rem)',
-            color: '#c8ff00',
-            letterSpacing: '0.12em',
-            textShadow: '0 0 40px rgba(200,255,0,0.3)',
-            lineHeight: 1,
-            whiteSpace: 'nowrap',
-          }}>
+          <h1 style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 'clamp(2.8rem, 10vw, 6.5rem)', color: '#c8ff00', letterSpacing: '0.12em', textShadow: '0 0 40px rgba(200,255,0,0.3)', lineHeight: 1, whiteSpace: 'nowrap' }}>
             OUTWORLDERS
           </h1>
         </motion.div>
 
-        {/* Divider */}
         <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.6, delay: 0.5 }}
           style={{ width: '100%', maxWidth: 480, height: 1, background: 'rgba(200,255,0,0.2)', margin: '2.5rem 0', transformOrigin: 'left' }} />
 
-        {/* Quote cycler */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} style={{ width: '100%' }}>
           <QuoteCycler />
         </motion.div>
 
-        {/* Divider */}
         <motion.div initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.6, delay: 0.9 }}
           style={{ width: '100%', maxWidth: 480, height: 1, background: 'rgba(200,255,0,0.2)', margin: '2.5rem 0', transformOrigin: 'right' }} />
 
-        {/* CTA */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.0 }}
           style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-          <button
-            onClick={() => setModal('form')}
+          <button onClick={() => setModal('form')}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
             style={{ background: hovered ? '#c8ff00' : 'transparent', border: '1px solid #c8ff00', color: hovered ? '#000' : '#c8ff00', fontFamily: "'Share Tech Mono', monospace", fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.22em', textTransform: 'uppercase', padding: '1rem 3rem', cursor: 'pointer', boxShadow: hovered ? '0 0 40px rgba(200,255,0,0.35)' : '0 0 20px rgba(200,255,0,0.1)', transition: 'all 0.2s' }}>
@@ -414,7 +374,6 @@ export default function Home() {
           </p>
         </motion.div>
 
-        {/* Footer corners */}
         <div style={{ position: 'absolute', bottom: '1.5rem', left: '1.5rem', fontSize: '0.52rem', color: 'rgba(200,255,0,0.18)', letterSpacing: '0.14em', fontFamily: "'Share Tech Mono', monospace" }}>
           OUTWORLD3RS · {new Date().getFullYear()} · ◈
         </div>
@@ -423,9 +382,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Modals */}
       <AnimatePresence>
-        {modal === 'form' && <WhitelistModal onClose={() => setModal('idle')} onSuccess={handleSuccess} />}
+        {modal === 'form' && <WhitelistModal onClose={() => setModal('idle')} onSuccess={() => setModal('success')} />}
         {modal === 'success' && <SuccessModal onClose={() => setModal('idle')} />}
       </AnimatePresence>
     </div>
