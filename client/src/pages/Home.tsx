@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Config ────────────────────────────────────────────────────────
 const FOLLOW_URL = 'https://x.com/outworld3rs?s=21';
-const TWEET_URL  = 'https://x.com/outworld3rs/status/2061173171382825160?s=61';
+const TWEET_URL  = 'https://x.com/outworld3rs/status/2063200939532517450;
 const EYES_URL   = '/Eyes.png'; // place Eyes.png in /public
 
 const QUOTES = [
@@ -143,8 +143,8 @@ type TaskKey = 'follow' | 'likeQuote' | 'tagFriends';
 
 const TASKS: { key: TaskKey; label: string; url: string; needsInput?: boolean; placeholder?: string }[] = [
   { key: 'follow',    label: 'Follow @outworld3rs',              url: FOLLOW_URL },
-  { key: 'likeQuote', label: 'Like & Quote the post',            url: TWEET_URL, needsInput: true, placeholder: 'Paste your quote tweet URL' },
-  { key: 'tagFriends',label: 'Tag 2 friends in the comments',    url: TWEET_URL, needsInput: true, placeholder: 'Paste your comment URL' },
+  { key: 'likeQuote', label: 'Like & Quote the post',            url: TWEET_URL, needsInput: true, placeholder: 'https://x.com/outworld3rs/status/2063200939532517450' },
+  { key: 'tagFriends',label: 'Tag 2 friends in the comments',    url: TWEET_URL, needsInput: true, placeholder: 'https://x.com/outworld3rs/status/2063200939532517450' },
 ];
 
 // ── Success Modal ─────────────────────────────────────────────────
