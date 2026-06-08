@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // ── Config ────────────────────────────────────────────────────────
 const FOLLOW_URL = 'https://x.com/outworld3rs?s=21';
-const TWEET_URL  = 'https://x.com/outworld3rs/status/2063202888868917757';
+const TWEET_URL  = 'https://x.com/outworld3rs/status/2064054171070828567';
 const EYES_URL   = '/Eyes.png';
 
 const QUOTES = [
